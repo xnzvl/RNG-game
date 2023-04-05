@@ -63,13 +63,15 @@ class Node:
 class JumpNode(Node):
     def __init__(
             self,
-            nodeId:   str,
-            target:   Node,
-            location: Location
+            nodeId:     str,
+            target:     Node,
+            targetArea: str,
+            location:   Location
     ) -> None:
         super().__init__(nodeId, location)
 
         self.jumpTarget = target
+        self.jumpArea = targetArea
 
     def travelTo(
             self,
@@ -82,6 +84,7 @@ class JumpNode(Node):
     ) -> None:
         super().arrive()
 
+        self.location.setLocation(None, self.jumpArea)
         self.travelTo(self.jumpTarget)
 
 
@@ -110,6 +113,9 @@ class RegularNode(Node):
         super().travelTo(destination)
 
 
+# =============================================================================
+
+
 def goToNode(
         source:      Node,
         destination: Node
@@ -118,7 +124,20 @@ def goToNode(
     return destination
 
 
-# =============================================================================
+def connectAreas(
+        x:        RegularNode,
+        xArea:    str,
+        y:        RegularNode,
+        yArea:    str,
+        location: Location
+) -> JumpNode:
+    xJumper = JumpNode(f"{x.nodeId}_jumpTo_{y.nodeId}", y, yArea, location)
+    yJumper = JumpNode(f"{y.nodeId}_jumpTo_{x.nodeId}", x, xArea, location)
+
+    x.adjacent.add(xJumper)
+    y.adjacent.add(yJumper)
+
+    return xJumper
 
 
 def createSmallArea(
@@ -147,8 +166,23 @@ def testRegulars() -> None:
         print(node.nodeId, [n.nodeId for n in node.adjacent])
 
 
+def testAreaConnection() -> None:
+    locationHolder = Location(True)
+
+    area_A = list(createSmallArea("A", locationHolder))
+    area_B = list(createSmallArea("B", locationHolder))
+
+    connectorA = area_A[0]
+    connectorB = area_B[0]
+
+    linkA = connectAreas(connectorA, "A", connectorB, "B", locationHolder)
+
+    connectorA.arrive()
+    connectorA.travelTo(linkA)
+
+
 def main() -> None:
-    testRegulars()
+    testAreaConnection()
 
 
 if __name__ == '__main__':
