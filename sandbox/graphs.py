@@ -1,6 +1,7 @@
-from typing import Tuple, Set
+from typing import Optional, Set
 
 # import tkinter as tk
+import random
 
 
 class Location():
@@ -8,8 +9,8 @@ class Location():
             self,
             verbose: bool
     ) -> None:
-        self.area = None
-        self.node = None
+        self.area: Optional[str] = None
+        self.node: Optional[str] = None
 
         self.verbose = verbose
 
@@ -24,19 +25,17 @@ class Location():
 
     def setLocation(
             self,
-            node: str,
-            area: str
+            node: Optional[str],
+            area: Optional[str]
     ) -> None:
         self.node = node
         self.area = area
 
         if self.verbose:
-            print(f"[NEW LOCATION]: {self.area} | {self.node}")
-
-    def getLocation(
-            self
-    ) -> Tuple[str, str]:
-        return self.area, self.node
+            if node is None and area is None:
+                print("travelling")
+            else:
+                print(f"[NEW LOCATION]: {self.area} | {self.node}")
 
 
 class Node:
@@ -59,31 +58,6 @@ class Node:
             self
     ) -> None:
         self.location.setNode(self.nodeId)
-
-
-class RegularNode(Node):
-    def __init__(
-            self,
-            nodeId:   str,
-            location: Location
-    ) -> None:
-        super().__init__(nodeId, location)
-
-        self.adjacent = set()
-
-    def addAjacent(
-            self,
-            newOnes: Set[Node]
-    ) -> None:
-        self.adjacent |= newOnes
-
-    def travelTo(
-            self,
-            destination: Node
-    ) -> None:
-        assert destination in self.adjacent
-
-        super().travelTo(destination)
 
 
 class JumpNode(Node):
@@ -111,24 +85,66 @@ class JumpNode(Node):
         self.travelTo(self.jumpTarget)
 
 
+class RegularNode(Node):
+    def __init__(
+            self,
+            nodeId:   str,
+            location: Location
+    ) -> None:
+        super().__init__(nodeId, location)
+
+        self.adjacent: Set[Node] = set()
+
+    def addAdjacent(
+            self,
+            newOnes: Set[Node]
+    ) -> None:
+        self.adjacent |= newOnes
+
+    def travelTo(
+            self,
+            destination: Node
+    ) -> None:
+        assert destination in self.adjacent
+
+        super().travelTo(destination)
+
+
+def goToNode(
+        source:      Node,
+        destination: Node
+) -> Node:
+    source.travelTo(destination)
+    return destination
+
+
+# =============================================================================
+
+
+def createSmallArea(
+        aName:    str,
+        location: Location
+) -> Set[RegularNode]:
+    area: Set[RegularNode] = set()
+
+    for nName in range(ord('a'), ord('f') + 1):
+        area.add(RegularNode(f"{aName}_{chr(nName)}", location))
+
+    for node in area:
+        choice = random.choice(list(area.copy() ^ {node}))
+
+        choice.adjacent.add(node)
+        node.adjacent.add(choice)
+
+    return area
+
+
 def testRegulars() -> None:
-    location = Location(True)
+    locationHolder = Location(True)
+    area_A = createSmallArea("A", locationHolder)
 
-    node_Aa = RegularNode("a", location)
-    node_Ab = RegularNode("b", location)
-    node_Ac = RegularNode("c", location)
-
-    node_Aa.addAjacent({node_Ab, node_Ac})
-    node_Ab.addAjacent({node_Aa, node_Ac})
-    node_Ac.addAjacent({node_Aa, node_Ab})
-
-    for n in [node_Aa, node_Ab, node_Ac]:
-        assert len(n.adjacent) == 2
-
-    node_Aa.arrive()
-    currentNode = node_Aa
-    currentNode.travelTo(node_Ab)
-    currentNode.travelTo(node_Ac)
+    for node in area_A:
+        print(node.nodeId, [n.nodeId for n in node.adjacent])
 
 
 def main() -> None:
