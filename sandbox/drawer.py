@@ -18,7 +18,7 @@ class MapWindow:
         self.root.resizable(False, False)
         self.root.title("Map")
 
-        if map.locationHolder.area is not None:
+        if map.location_holder.area is not None:
             self.drawEdges()
             self.drawNodes()
 
@@ -26,12 +26,12 @@ class MapWindow:
         self.root.mainloop()
 
     def drawEdges(self) -> None:
-        for src in self.map.locationHolder.area.nodeDict.values():
+        for src in self.map.location_holder.area.node_dict.values():
             for dst in src.adjacent:
                 drawEdge(self.canvas, src, dst, self.anchor)
 
     def drawNodes(self) -> None:
-        for node in self.map.locationHolder.area.nodeDict.values():
+        for node in self.map.location_holder.area.node_dict.values():
             drawNode(self.canvas, node, self.anchor)
 
 

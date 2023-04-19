@@ -4,108 +4,108 @@ from typing import Tuple as Pair
 import drawer
 
 
-class Map:
-    def __init__(
-            self,
-            locationHolder: 'LocationHolder'
-    ) -> None:
-        self.areaDict: Dict[str, Area] = {}
-        self.locationHolder = locationHolder
-
-    def showArea(
-            self
-    ) -> None:
-        pass
-
-
-class LocationHolder:
+class Location_holder:
     def __init__(self) -> None:
         self.area: Optional[Area] = None
         self.node: Optional[Node] = None
 
 
+class Map:
+    def __init__(
+            self,
+            location_holder: Location_holder
+    ) -> None:
+        self.area_dict: Dict[str, Area] = {}
+        self.location_holder = location_holder
+
+    def show_area(
+            self
+    ) -> None:
+        pass
+
+
 class Area:
     def __init__(
             self,
-            areaName: str,
-            areaAnchor: Pair[int, int]
+            area_name: str,
+            area_anchor: Pair[int, int]
     ) -> None:
-        self.nodeDict: Dict[str, Node] = {}
-        self.name = areaName
-        self.anchor = areaAnchor
-
-    def addBiEdge(
-            self,
-            a: 'Node',
-            b: 'Node'
-    ) -> None:
-        a.adjacent.add(b)
-        b.adjacent.add(a)
+        self.node_dict: Dict[str, Node] = {}
+        self.name = area_name
+        self.anchor = area_anchor
 
 
 class Node:
     def __init__(
             self,
-            nodeName: str,
-            nodePosition: Pair[int, int],
-            locationHolder: LocationHolder
+            node_name: str,
+            node_position: Pair[int, int],
+            location_holder: Location_holder
     ) -> None:
-        self.name = nodeName
+        self.name = node_name
         self.adjacent: Set[Node] = set()
-        self.position = nodePosition
-        self.locationHolder = locationHolder
+        self.position = node_position
+        self.location_holder = location_holder
 
 
-def createArea(
-        map: Map,
-        areaName: str,
-        areaAnchor: Pair[int, int]
+def add_bi_edge(
+        a: Node,
+        b: Node
+) -> None:
+    a.adjacent.add(b)
+    b.adjacent.add(a)
+
+
+def create_area(
+        my_map: Map,
+        area_name: str,
+        area_anchor: Pair[int, int]
 ) -> Area:
-    area = Area(areaName, areaAnchor)
-    map.areaDict[areaName] = area
+    area = Area(area_name, area_anchor)
+    my_map.area_dict[area_name] = area
 
     return area
 
 
-def createNodeInArea(
-        map: Map,
+def create_node_in_area(
+        my_map: Map,
         area: Area,
-        nodeName: str,
-        nodePosition: Pair[int, int]
+        node_name: str,
+        node_position: Pair[int, int]
 ) -> Node:
-    node = Node(nodeName, nodePosition, map.locationHolder)
-    area.nodeDict[nodeName] = node
+    node = Node(node_name, node_position, my_map.location_holder)
+    area.node_dict[node_name] = node
 
     return node
 
 
-def fillMap(
-        map: Map
+def fill_map(
+        my_map: Map
 ) -> None:
-    areaA = createArea(map, "A", (0, 0))
-    map.locationHolder.area = areaA
+    area_a = create_area(my_map, "A", (0, 0))
+    my_map.location_holder.area = area_a
 
     unit = 150
 
-    a = createNodeInArea(map, areaA, "A", (0, 0))
-    b = createNodeInArea(map, areaA, "B", (unit, 0))
-    c = createNodeInArea(map, areaA, "C", (0, unit))
-    d = createNodeInArea(map, areaA, "D", (unit, unit))
-    e = createNodeInArea(map, areaA, "E", (-unit, -unit))
+    a = create_node_in_area(my_map, area_a, "A", (0, 0))
+    b = create_node_in_area(my_map, area_a, "B", (unit, 0))
+    c = create_node_in_area(my_map, area_a, "C", (0, unit))
+    d = create_node_in_area(my_map, area_a, "D", (unit, unit))
+    e = create_node_in_area(my_map, area_a, "E", (-unit, -unit))
 
-    areaA.addBiEdge(a, b)
-    areaA.addBiEdge(a, e)
-    areaA.addBiEdge(a, c)
-    areaA.addBiEdge(b, d)
-    areaA.addBiEdge(c, d)
+    add_bi_edge(a, b)
+    add_bi_edge(a, e)
+    add_bi_edge(a, c)
+    add_bi_edge(b, d)
+    add_bi_edge(c, d)
 
 
 def main() -> None:
-    map = Map(LocationHolder())
+    my_map = Map(Location_holder())
 
-    fillMap(map)
+    fill_map(my_map)
 
-    drawer.MapWindow(map)
+    drawer.MapWindow(my_map)
 
 
 if __name__ == "__main__":
