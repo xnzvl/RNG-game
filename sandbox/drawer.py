@@ -18,19 +18,35 @@ class MapWindow:
         self.root.resizable(False, False)
         self.root.title("Map")
 
-        self.drawArea()
+        if map.locationHolder.area is not None:
+            self.drawEdges()
+            self.drawNodes()
 
         self.canvas.pack()
         self.root.mainloop()
 
-    def drawArea(self) -> None:
-        area = self.map.locationHolder.area
+    def drawEdges(self) -> None:
+        for src in self.map.locationHolder.area.nodeDict.values():
+            for dst in src.adjacent:
+                drawEdge(self.canvas, src, dst, self.anchor)
 
-        if area is None:
-            return
-
-        for node in area.nodeDict.values():
+    def drawNodes(self) -> None:
+        for node in self.map.locationHolder.area.nodeDict.values():
             drawNode(self.canvas, node, self.anchor)
+
+
+def drawEdge(
+        canvas: tk.Canvas,
+        nodeA: map.Node,
+        nodeB: map.Node,
+        anchor: Pair[int, int]
+) -> None:
+    xA, yA = nodeA.position
+    xB, yB = nodeB.position
+
+    xAnchor, yAnchor = anchor
+
+    canvas.create_line(xA + xAnchor, yA + yAnchor, xB + xAnchor, yB + yAnchor)
 
 
 def drawNode(

@@ -33,12 +33,14 @@ class Area:
         self.nodeDict: Dict[str, Node] = {}
         self.name = areaName
         self.anchor = areaAnchor
-        self.edges: Set[Pair[Node, Node]] = set()
 
-    def addEdge(
-            self
+    def addBiEdge(
+            self,
+            a: 'Node',
+            b: 'Node'
     ) -> None:
-        pass
+        a.adjacent.add(b)
+        b.adjacent.add(a)
 
 
 class Node:
@@ -83,11 +85,19 @@ def fillMap(
     areaA = createArea(map, "A", (0, 0))
     map.locationHolder.area = areaA
 
-    unit = 60
+    unit = 150
 
-    createNodeInArea(map, areaA, "node0_A", (0, 0))
-    createNodeInArea(map, areaA, "node1_A", (unit, 0))
-    createNodeInArea(map, areaA, "node2_A", (0, unit))
+    a = createNodeInArea(map, areaA, "A", (0, 0))
+    b = createNodeInArea(map, areaA, "B", (unit, 0))
+    c = createNodeInArea(map, areaA, "C", (0, unit))
+    d = createNodeInArea(map, areaA, "D", (unit, unit))
+    e = createNodeInArea(map, areaA, "E", (-unit, -unit))
+
+    areaA.addBiEdge(a, b)
+    areaA.addBiEdge(a, e)
+    areaA.addBiEdge(a, c)
+    areaA.addBiEdge(b, d)
+    areaA.addBiEdge(c, d)
 
 
 def main() -> None:
