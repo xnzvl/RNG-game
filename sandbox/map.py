@@ -1,13 +1,15 @@
 from typing import Dict, Optional, Set
 from typing import Tuple as Pair
 
+import drawer
+
 
 class Map:
     def __init__(
             self,
             locationHolder: 'LocationHolder'
     ) -> None:
-        self.areas: Dict[str, Area] = {}
+        self.areaDict: Dict[str, Area] = {}
         self.locationHolder = locationHolder
 
     def showArea(
@@ -28,9 +30,15 @@ class Area:
             areaName: str,
             areaAnchor: Pair[int, int]
     ) -> None:
-        self.nodes: Set[Node] = set()
+        self.nodeDict: Dict[str, Node] = {}
         self.name = areaName
         self.anchor = areaAnchor
+        self.edges: Set[Pair[Node, Node]] = set()
+
+    def addEdge(
+            self
+    ) -> None:
+        pass
 
 
 class Node:
@@ -52,7 +60,7 @@ def createArea(
         areaAnchor: Pair[int, int]
 ) -> Area:
     area = Area(areaName, areaAnchor)
-    map.areas[areaName] = area
+    map.areaDict[areaName] = area
 
     return area
 
@@ -60,16 +68,34 @@ def createArea(
 def createNodeInArea(
         map: Map,
         area: Area,
-        nodeName: str
+        nodeName: str,
+        nodePosition: Pair[int, int]
 ) -> Node:
-    node = Node(nodeName, map.locationHolder)
-    area.nodes.add(node)
+    node = Node(nodeName, nodePosition, map.locationHolder)
+    area.nodeDict[nodeName] = node
 
     return node
 
 
+def fillMap(
+        map: Map
+) -> None:
+    areaA = createArea(map, "A", (0, 0))
+    map.locationHolder.area = areaA
+
+    unit = 60
+
+    createNodeInArea(map, areaA, "node0_A", (0, 0))
+    createNodeInArea(map, areaA, "node1_A", (unit, 0))
+    createNodeInArea(map, areaA, "node2_A", (0, unit))
+
+
 def main() -> None:
     map = Map(LocationHolder())
+
+    fillMap(map)
+
+    drawer.MapWindow(map)
 
 
 if __name__ == "__main__":
