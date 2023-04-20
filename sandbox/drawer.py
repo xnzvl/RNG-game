@@ -47,7 +47,7 @@ def draw_edge(
 
     x_anchor, y_anchor = anchor
 
-    canvas.create_line(x_a + x_anchor, y_a + y_anchor, x_b + x_anchor, y_b + y_anchor)
+    canvas.create_line(x_a + x_anchor, -y_a + y_anchor, x_b + x_anchor, -y_b + y_anchor)
 
 
 def draw_node(

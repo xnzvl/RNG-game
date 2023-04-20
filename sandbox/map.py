@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Set
+from typing import Dict, List, Optional, Set
 from typing import Tuple as Pair
 
 import drawer
@@ -75,6 +75,22 @@ class Jump_node(Node):
         return tmp
 
 
+def create_edge(
+        node_a: Node,
+        node_b: Node
+) -> None:
+    node_a.get_adjacent().add(node_b)
+    node_b.get_adjacent().add(node_a)
+
+
+def link_node_with(
+        src: Node,
+        targets: List[Node]
+) -> None:
+    for target in targets:
+        create_edge(src, target)
+
+
 def prepare_area(
         area: Area,
         location_holder: Location_holder
@@ -94,8 +110,19 @@ def prepare_area(
     k = area.add_node(Cross_node("K", (2 * unit, -2 * unit), location_holder))
     l = area.add_node(Cross_node("L", (2 * unit, 2 * unit), location_holder))
     m = area.add_node(Cross_node("M", (2 * unit, unit), location_holder))
+    n = area.add_node(Cross_node("N", (2 * unit, -unit), location_holder))
 
     location_holder.node = a
+
+    link_node_with(a, [f, b, c, e, k])
+    link_node_with(b, [f, d])
+    link_node_with(d, [b, g, c])
+    link_node_with(h, [g, c])
+    link_node_with(j, [g, f, i])
+    link_node_with(m, [f, i, l])
+    link_node_with(i, [e, m, l])
+    link_node_with(k, [c])
+    link_node_with(n, [e, k, m])
 
 
 def main() -> None:
