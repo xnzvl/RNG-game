@@ -7,6 +7,7 @@ import drawer
 class Location_holder:
     def __init__(self) -> None:
         self.node: Optional[Node] = None
+        self.target: Optional[Node] = None
 
 
 class Area:
@@ -111,18 +112,23 @@ def prepare_area(
     l = area.add_node(Cross_node("L", (2 * unit, 2 * unit), location_holder))
     m = area.add_node(Cross_node("M", (2 * unit, unit), location_holder))
     n = area.add_node(Cross_node("N", (2 * unit, -unit), location_holder))
+    o = area.add_node(Cross_node("O", (0, unit), location_holder))
+    p = area.add_node(Cross_node("P", (-2 * unit, 0), location_holder))
+    q = area.add_node(Cross_node("Q", (-2 * unit, unit), location_holder))
 
     location_holder.node = a
 
     link_node_with(a, [f, b, c, e, k])
     link_node_with(b, [f, d])
-    link_node_with(d, [b, g, c])
+    link_node_with(d, [b, c])
     link_node_with(h, [g, c])
-    link_node_with(j, [g, f, i])
-    link_node_with(m, [f, i, l])
-    link_node_with(i, [e, m, l])
+    link_node_with(j, [f, i])
+    link_node_with(m, [i, l])
+    link_node_with(i, [e, m])
     link_node_with(k, [c])
     link_node_with(n, [e, k, m])
+    link_node_with(p, [g, d, b])
+    link_node_with(q, [p, f, j])
 
 
 def main() -> None:
