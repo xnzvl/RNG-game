@@ -4,6 +4,9 @@ import tkinter as tk
 import map
 
 
+LIGHT_BLUE = "#4c8ffc"
+
+
 class AreaWindow:
     def __init__(
             self,
