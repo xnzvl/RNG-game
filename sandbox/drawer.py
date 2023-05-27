@@ -48,24 +48,30 @@ class Display_map:
         for area in self.map.get_areas():
             for src in area.get_nodes():
                 for dst in src.get_adjacent():
-                    draw_edge(self.canvas, src, dst, area.anchor)
+                    draw_edge(self.canvas, src, dst, area.anchor, self.map)
 
 
 def draw_edge(
         canvas: tk.Canvas,
         node_a: map.Node,
         node_b: map.Node,
-        area_anchor: Pair[int, int]
+        area_anchor: Pair[int, int],
+        map: map.Map
 ) -> None:
     canvas_x, canvas_y = CANVAS_CENTER
     area_x, area_y = area_anchor
     a_x, a_y = node_a.position
     b_x, b_y = node_b.position
 
+    line_colour = "#405cff" \
+        if node_a in map.path_nodes and node_b in map.path_nodes \
+        else "gray"
+
     canvas.create_line(
         (a_x + area_x + canvas_x) * UNIT, (-a_y + area_y + canvas_y) * UNIT,
         (b_x + area_x + canvas_x) * UNIT, (-b_y + area_y + canvas_y) * UNIT,
-        fill="gray"
+        fill=line_colour,
+        width=2
     )
 
 
@@ -82,9 +88,13 @@ def draw_node(
     x = (canvas_x + area_x + node_x) * UNIT
     y = (canvas_y + area_y - node_y) * UNIT
 
-    colour = "red" if node == map.current_node else (
-        "blue" if node == map.current_target else "black"
-    )
+    match node:
+        case map.current_node:
+            colour = "red"
+        case map.current_target:
+            colour = "#2f43f7"
+        case _:
+            colour = "#26a1ff" if node in map.path_nodes else "black"
 
     canvas.create_text(x + 5, y - 5, anchor="sw", text=node.id)
     canvas.tag_bind(

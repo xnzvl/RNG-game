@@ -1,6 +1,9 @@
-from typing import List, Optional, Set, Tuple
+from typing import Any, List, Optional, Set, Tuple
 
 import abc
+import dataclasses
+import heapq
+import math
 
 import drawer
 
@@ -14,6 +17,8 @@ class Map:
         self.current_target: Optional['Node'] = None
 
         self.areas: Set['Area'] = set()
+
+        self.path_nodes: Set['Area'] = set()
 
     def add_area(
             self,
@@ -44,8 +49,21 @@ class Map:
     ) -> None:
         if self.current_target == node:
             self.set_current_node(node)
+            self.path_nodes = set()
         else:
             self.current_target = node
+            tracker = tracking_dijkstra(self.current_node, self.current_target)
+
+            if tracker is not None:
+                self.path_nodes = track_path(tracker)
+            else:
+                self.path_nodes = set()
+
+
+@dataclasses.dataclass(eq=True, order=True)
+class Tracker_node:
+    node: 'Node'
+    previous_tracker: Optional['Tracker_node']
 
 
 class Area:
@@ -85,6 +103,15 @@ class Node(abc.ABC):
             self
     ) -> Set['Node']:
         ...
+
+    def __lt__(
+            self,
+            other: Any
+    ) -> int:
+        if not isinstance(other, Node):
+            raise TypeError("comparison not implemented")
+
+        return -1
 
 
 class Cross_node(Node):
@@ -129,19 +156,72 @@ class Jump_node(Node):
 
 
 def create_edge(
-        node_a: Cross_node,
-        node_b: Cross_node
+        node_a: Node,
+        node_b: Node
 ) -> None:
-    node_a.add_adjacent(node_b)
-    node_b.add_adjacent(node_a)
+    if isinstance(node_a, Cross_node) and isinstance(node_b, Cross_node):
+        node_a.add_adjacent(node_b)
+        node_b.add_adjacent(node_a)
+        return
+    raise TypeError("not implemented yet")
 
 
 def link_node_with(
-        src: Cross_node,
-        targets: List[Cross_node]
+        src: Node,
+        targets: List[Node]
 ) -> None:
     for target in targets:
         create_edge(src, target)
+
+
+def add_distance(
+        node_a: Node,
+        node_b: Node,
+        already_travelled: float
+) -> float:
+    a_x, a_y = node_a.position
+    b_x, b_y = node_b.position
+
+    return math.sqrt((a_x - b_x) ** 2 + (a_y - b_y) ** 2) + already_travelled
+
+
+def track_path(
+        tracker: Tracker_node
+) -> Set[Node]:
+    path: Set[Node] = set()
+
+    while tracker is not None:
+        path.add(tracker.node)
+        tracker = tracker.previous_tracker
+
+    return path
+
+
+def tracking_dijkstra(
+        source_node: Node,
+        target_node: Node
+) -> Optional[Tracker_node]:
+    heap: List[Tuple[float, Tracker_node]] = [(0.0, Tracker_node(source_node, None))]
+    already_seen: Set[Node] = set()
+
+    while len(heap) > 0:
+        distance, tracker = heapq.heappop(heap)
+        current_node = tracker.node
+
+        for adjacent in current_node.get_adjacent():
+            if adjacent in already_seen:
+                continue
+
+            if adjacent == target_node:
+                return Tracker_node(adjacent, tracker)
+
+            heapq.heappush(
+                heap,
+                (add_distance(current_node, adjacent, distance), Tracker_node(adjacent, tracker))
+            )
+            already_seen.add(current_node)
+
+    return None
 
 
 def init_map() -> Map:
@@ -176,9 +256,6 @@ def init_map() -> Map:
     y = area_A.add_node(Cross_node("Y", (3, -4)))
     z = area_A.add_node(Cross_node("Z", (4, -4)))
 
-    the_map.set_current_node(n)
-    the_map.add_area(area_A)
-
     link_node_with(a, [b, f, h])
     link_node_with(b, [a, f, h])
     link_node_with(c, [f, g, i, k])
@@ -205,6 +282,11 @@ def init_map() -> Map:
     link_node_with(x, [p, s, u, v])
     link_node_with(y, [t, v, z])
     link_node_with(z, [q, t, v, y])
+
+    area_A.add_node(Cross_node("unreachable", (1, 0)))
+
+    the_map.set_current_node(n)
+    the_map.add_area(area_A)
 
     return the_map
 
