@@ -1,1 +1,2 @@
-# mRG
+# RNG game
+R&G game
