@@ -4,6 +4,13 @@ import tkinter as tk
 import map
 
 
+SOURCE_COLOUR = "red"
+
+TARGET_COLOUR = "#008cff"
+TRACK_COLOUR = "#296aa3"
+PATH_COLOUR = TRACK_COLOUR
+
+
 UNIT = 100
 CANVAS_CENTER = (5, 5)
 
@@ -19,7 +26,7 @@ class Display_map:
         self.canvas = tk.Canvas(width=UNIT * 10, height=UNIT * 10)
         self.canvas.bind("<Button-1>", lambda _: self.refresh())
 
-        self.root.resizable(False, False)
+        # self.root.resizable(False, False)
         self.root.title("MAP-area:testing")
 
         self.canvas.pack()
@@ -63,7 +70,7 @@ def draw_edge(
     a_x, a_y = node_a.position
     b_x, b_y = node_b.position
 
-    line_colour = "#405cff" \
+    line_colour = PATH_COLOUR \
         if node_a in map.path_nodes and node_b in map.path_nodes \
         else "gray"
 
@@ -90,11 +97,11 @@ def draw_node(
 
     match node:
         case map.current_node:
-            colour = "red"
+            colour = SOURCE_COLOUR
         case map.current_target:
-            colour = "#2f43f7"
+            colour = TARGET_COLOUR
         case _:
-            colour = "#26a1ff" if node in map.path_nodes else "black"
+            colour = TRACK_COLOUR if node in map.path_nodes else "black"
 
     canvas.create_text(x + 5, y - 5, anchor="sw", text=node.id)
     canvas.tag_bind(
