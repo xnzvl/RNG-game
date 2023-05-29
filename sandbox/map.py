@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import abc
 import dataclasses
@@ -52,7 +52,7 @@ class Map:
             self.path_nodes = set()
         else:
             self.current_target = node
-            tracker = tracking_dijkstra(self.current_node, self.current_target)
+            tracker = dijkstra(self.current_node, self.current_target)
 
             if tracker is not None:
                 self.path_nodes = track_path(tracker)
@@ -197,29 +197,49 @@ def track_path(
     return path
 
 
-def tracking_dijkstra(
+def distance(
+        node_a: Node,
+        node_b: Node
+) -> float:
+    a_x, a_y = node_a.position
+    b_x, b_y = node_b.position
+
+    return math.sqrt((a_x - b_x) ** 2 + (a_y - b_y) ** 2)
+
+
+def dijkstra(
         source_node: Node,
         target_node: Node
 ) -> Optional[Tracker_node]:
-    heap: List[Tuple[float, Tracker_node]] = [(0.0, Tracker_node(source_node, None))]
-    already_seen: Set[Node] = set()
+    heap: List[Tuple[float, Tracker_node]] = list()
+    already_popped: Set[Node] = set()
+
+    heapq.heappush(heap, (0.0, Tracker_node(source_node, None)))
 
     while len(heap) > 0:
-        distance, tracker = heapq.heappop(heap)
-        current_node = tracker.node
+        dist, tracker = heapq.heappop(heap)
+        node = tracker.node
 
-        for adjacent in current_node.get_adjacent():
-            if adjacent in already_seen:
-                continue
+        print([tracker.node.id for _, tracker in heap])
 
-            if adjacent == target_node:
-                return Tracker_node(adjacent, tracker)
+        if node == target_node:
+            return tracker
+
+        if node in already_popped:
+            continue
+
+        already_popped.add(node)
+
+        for adjacent in [
+                n for n in node.get_adjacent() if n not in already_popped
+        ]:
+            new_distance = dist \
+                + distance(node, adjacent) \
+                + distance(adjacent, target_node)
 
             heapq.heappush(
-                heap,
-                (add_distance(current_node, adjacent, distance), Tracker_node(adjacent, tracker))
+                heap, (new_distance, Tracker_node(adjacent, tracker))
             )
-            already_seen.add(current_node)
 
     return None
 
