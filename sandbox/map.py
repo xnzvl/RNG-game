@@ -212,7 +212,7 @@ def dijkstra(
         target_node: Node
 ) -> Optional[Tracker_node]:
     heap: List[Tuple[float, Tracker_node]] = list()
-    already_popped: Set[Node] = set()
+    shortest_paths: Dict[Node, float] = dict()
 
     heapq.heappush(heap, (0.0, Tracker_node(source_node, None)))
 
@@ -225,21 +225,20 @@ def dijkstra(
         if node == target_node:
             return tracker
 
-        if node in already_popped:
-            continue
-
-        already_popped.add(node)
-
         for adjacent in [
-                n for n in node.get_adjacent() if n not in already_popped
+                n for n in node.get_adjacent() if n not in shortest_paths
         ]:
-            new_distance = dist \
+            alt_distance = dist \
                 + distance(node, adjacent) \
                 + distance(adjacent, target_node)
+            # THIS DOESN'T WORK PROPERLY
 
-            heapq.heappush(
-                heap, (new_distance, Tracker_node(adjacent, tracker))
-            )
+            if adjacent not in shortest_paths or \
+                    alt_distance < shortest_paths[adjacent]:
+                heapq.heappush(
+                    heap, (alt_distance, Tracker_node(adjacent, tracker))
+                )
+                shortest_paths[adjacent] = alt_distance
 
     return None
 
