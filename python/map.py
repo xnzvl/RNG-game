@@ -212,13 +212,16 @@ def dijkstra(
         target_node: Node
 ) -> Optional[Tracker_node]:
     heap: List[Tuple[float, Tracker_node]] = list()
-    shortest_paths: Dict[Node, float] = dict()
+    lowest_priorities: Dict[Node, float] = dict()
 
-    heapq.heappush(heap, (0.0, Tracker_node(source_node, None)))
+    heapq.heappush(
+        heap, (distance(source_node, target_node), Tracker_node(source_node, None))
+    )
 
     while len(heap) > 0:
-        dist, tracker = heapq.heappop(heap)
+        priority, tracker = heapq.heappop(heap)
         node = tracker.node
+        travelled = priority - distance(node, target_node)
 
         print([tracker.node.id for _, tracker in heap])
 
@@ -226,19 +229,18 @@ def dijkstra(
             return tracker
 
         for adjacent in [
-                n for n in node.get_adjacent() if n not in shortest_paths
+                n for n in node.get_adjacent() if n not in lowest_priorities
         ]:
-            alt_distance = dist \
+            alt_prio = travelled \
                 + distance(node, adjacent) \
                 + distance(adjacent, target_node)
-            # THIS DOESN'T WORK PROPERLY
 
-            if adjacent not in shortest_paths or \
-                    alt_distance < shortest_paths[adjacent]:
+            if adjacent not in lowest_priorities or \
+                    alt_prio < lowest_priorities[adjacent]:
                 heapq.heappush(
-                    heap, (alt_distance, Tracker_node(adjacent, tracker))
+                    heap, (alt_prio, Tracker_node(adjacent, tracker))
                 )
-                shortest_paths[adjacent] = alt_distance
+                lowest_priorities[adjacent] = alt_prio
 
     return None
 
