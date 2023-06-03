@@ -223,7 +223,12 @@ def dijkstra(
         node = tracker.node
         travelled = priority - distance(node, target_node)
 
-        print([tracker.node.id for _, tracker in heap])
+        # == TODO: remove testing print ======
+        prev_node = tracker.previous_tracker.node.id \
+            if tracker.previous_tracker is not None \
+            else "#"
+        print(f"({prev_node})", node.id, [(t.node.id, round(p, 2)) for p, t in heap])
+        # ====================================
 
         if node == target_node:
             return tracker
@@ -306,7 +311,7 @@ def init_map() -> Map:
 
     area_A.add_node(Cross_node("unreachable", (1, 0)))
 
-    the_map.set_current_node(n)
+    the_map.set_current_node(e)
     the_map.add_area(area_A)
 
     return the_map
