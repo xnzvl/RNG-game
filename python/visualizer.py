@@ -19,18 +19,16 @@ WIDTH = 2 * HEIGHT
 UNIT = 15
 RADIUS = UNIT // 3
 
-SOURCE = (-WIDTH // 4, 0)
-TARGET = (WIDTH // 4, 0)
+SOURCE = (-WIDTH // 4, 15)
+TARGET = (WIDTH // 4, -15)
 
 FORBIDDEN: Set[Vertex] = set()
 
 COLOUR_CURRENT = "red"
-COLOUR_FORBIDDEN = "#8d2dfa"
+COLOUR_FORBIDDEN = "#5400a8"
 COLOUR_HIT = "white"
-COLOUR_IN_HEAP = "#0398fc"
-COLOUR_POPPED = "#20445c"
-COLOUR_SOURCE = "#9fed18"
-COLOUR_TARGET = "#ed7818"
+COLOUR_SOURCE = "#00eaff"
+COLOUR_TARGET = "#ff8d00"
 
 # ========================================
 
@@ -102,47 +100,83 @@ def distance(
     return math.sqrt((a_x - b_x) ** 2 + (a_y - b_y) ** 2)
 
 
+def seeker_pop(
+        canvas: tk.Canvas,
+        heap: List[Tuple[float, Vertex]],
+        priorities: Dict[Vertex, Tuple[float, Vertex]],
+        relative_target: Vertex
+) -> Vertex:
+    if relative_target == SOURCE:
+        heap_colour = "#ffc72b"
+        popped_colour = "#a87c00"
+    else:
+        heap_colour = "#0398fc"
+        popped_colour = "#0062a8"
+
+    priority, vertex = heapq.heappop(heap)
+    travelled = priority - distance(vertex, relative_target)
+
+    for adjacent in get_adjacent(vertex):
+        alt_prio = travelled \
+            + distance(vertex, adjacent) \
+            + distance(adjacent, relative_target)
+
+        if adjacent not in priorities or \
+                alt_prio < priorities[adjacent][0]:
+            draw_vertex(canvas, adjacent, heap_colour)
+            draw_edge(canvas, vertex, adjacent)
+
+            heapq.heappush(
+                heap, (alt_prio, adjacent)
+            )
+            priorities[adjacent] = alt_prio, vertex
+
+    draw_vertex(canvas, vertex, popped_colour)
+    draw_vertex(canvas, SOURCE, COLOUR_SOURCE)
+    draw_vertex(canvas, TARGET, COLOUR_TARGET)
+
+    return vertex
+
+
 # THE PATHFINDING FUNCTION
 def seeker(
         canvas: tk.Canvas,
         source: Vertex,
-        target: Vertex
+        target: Vertex,
+        bidirectional: bool = False
 ) -> None:
-    heap: List[Tuple[float, Vertex]] = list()
-    lowest_priorities: Dict[Vertex, float] = dict()
+    source_heap: List[Tuple[float, Vertex]] = list()
+    target_heap: List[Tuple[float, Vertex]] = list()
+
+    source_priorities: Dict[Vertex, Tuple[float, Vertex]] = dict()
+    source_popped: Set[Vertex] = set()
+
+    if bidirectional:
+        target_priorities: Dict[Vertex, Tuple[float, Vertex]] = dict()
+        target_popped: Set[Vertex] = set()
 
     heapq.heappush(
-        heap, (distance(source, target), source)
+        source_heap, (distance(source, target), source)
+    )
+    heapq.heappush(
+        target_heap, (distance(target, source), target)
     )
 
-    while len(heap) > 0:
-        priority, vertex = heapq.heappop(heap)
-        draw_vertex(canvas, vertex, COLOUR_CURRENT)
-        time.sleep(DELAY)
+    while len(source_heap) > 0 and len(target_heap) > 0:
+        pop_src = seeker_pop(canvas, source_heap, source_priorities, target)
+        source_popped.add(pop_src)
 
-        travelled = priority - distance(vertex, target)
+        if bidirectional:
+            pop_trg = seeker_pop(canvas, target_heap, target_priorities, source)
+            target_popped.add(pop_trg)
 
-        if vertex == target:
-            draw_vertex(canvas, vertex, COLOUR_HIT)
+            if pop_src in target_popped or pop_trg in source_popped:
+                return
+
+        elif pop_src == TARGET:
             return
 
-        for adjacent in get_adjacent(vertex):
-            alt_prio = travelled \
-                + distance(vertex, adjacent) \
-                + distance(adjacent, target)
-
-            if adjacent not in lowest_priorities or \
-                    alt_prio < lowest_priorities[adjacent]:
-                draw_vertex(canvas, adjacent, COLOUR_IN_HEAP)
-                draw_edge(canvas, vertex, adjacent)
-
-                heapq.heappush(
-                    heap, (alt_prio, adjacent)
-                )
-                lowest_priorities[adjacent] = alt_prio
-
-        draw_vertex(canvas, vertex, COLOUR_POPPED)
-        draw_vertex(canvas, SOURCE, COLOUR_SOURCE)
+        time.sleep(DELAY)
 
     print("unreachable")
     return None
@@ -212,7 +246,7 @@ def main() -> None:
         seeking += 1
 
         if seeking == 1:
-            seeker(canvas, SOURCE, TARGET)
+            seeker(canvas, SOURCE, TARGET, True)
         else:
             seeking = 2
 
@@ -220,7 +254,7 @@ def main() -> None:
         custom_config()
         map_to_vertices()
     else:
-        init_forbidden()  # edit body of this func to manage forbidden areas
+        init_forbidden()
 
     window = tk.Tk()
     window.title("MAP-shortest_path_finder:testing")
