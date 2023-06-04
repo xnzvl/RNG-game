@@ -10,7 +10,7 @@ import map
 
 Vertex = Tuple[int, int]
 
-DELAY = 0.5  # float seconds
+DELAY = 0.01  # float seconds
 CUSTOM = False
 
 HEIGHT = 51
@@ -161,7 +161,17 @@ def forbid_area(
 
 
 def init_forbidden() -> None:
-    forbid_area((-1, 2), (1, -2))
+    # forbid_area((-WIDTH // 4 - 2, 2), (-WIDTH // 4 + 2, 2))
+    # forbid_area((-WIDTH // 4 - 2, -2), (-WIDTH // 4 + 2, -2))
+    # forbid_area((-WIDTH // 4 + 2, -2), (-WIDTH // 4 + 2, 2))
+
+    forbid_area((-1, 13), (1, -13))
+    forbid_area((-13, 7), (13, 5))
+    forbid_area((-13, -7), (13, -5))
+
+    # forbid_area((WIDTH // 4 - 2, 2), (WIDTH // 4 + 2, 2))
+    # forbid_area((WIDTH // 4 - 2, -2), (WIDTH // 4 + 2, -2))
+    # forbid_area((WIDTH // 4 - 2, -2), (WIDTH // 4 - 2, 2))
 
 
 def map_to_vertices() -> None:
@@ -173,7 +183,9 @@ def map_to_vertices() -> None:
 
 
 def custom_config() -> None:
-    global SOURCE, TARGET, WIDTH, HEIGHT, UNIT, RADIUS
+    global SOURCE, TARGET, WIDTH, HEIGHT, UNIT, RADIUS, DELAY
+
+    DELAY = 0.5
 
     SOURCE = (4, 4)
     TARGET = (-4, -4)
