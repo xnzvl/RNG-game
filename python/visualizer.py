@@ -5,19 +5,24 @@ import tkinter as tk
 
 from typing import Dict, List, Tuple, Set
 
+import map
+
 
 Vertex = Tuple[int, int]
 
-DELAY = 0.1  # float seconds
+DELAY = 0.5  # float seconds
 
-HEIGHT = 25
-WIDTH = 50
+HEIGHT = 10
+WIDTH = 10
 
-UNIT = 30
+UNIT = 50
 RADIUS = UNIT // 3
 
-SOURCE = (- WIDTH // 4, 0)
-TARGET = (WIDTH // 4, 0)
+# SOURCE = (- WIDTH // 4, 0)
+# TARGET = (WIDTH // 4, 0)
+
+SOURCE = (4, 4)
+TARGET = (-4, -4)
 
 FORBIDDEN: Set[Vertex] = set()
 
@@ -29,6 +34,10 @@ COLOUR_POPPED = "#20445c"
 COLOUR_SOURCE = "#9fed18"
 COLOUR_TARGET = "#ed7818"
 
+# ========================================
+
+ADJACENTS: Dict[Vertex, Set[Vertex]] = {}
+
 
 def draw_vertex(
         canvas: tk.Canvas,
@@ -38,8 +47,8 @@ def draw_vertex(
     x, y = vertex
 
     canvas.create_oval(
-        (x + WIDTH // 2) * UNIT + RADIUS, (y + HEIGHT // 2) * UNIT + RADIUS,
-        (x + WIDTH // 2) * UNIT - RADIUS, (y + HEIGHT // 2) * UNIT - RADIUS,
+        (x + WIDTH // 2) * UNIT + RADIUS, (-y + HEIGHT // 2) * UNIT + RADIUS,
+        (x + WIDTH // 2) * UNIT - RADIUS, (-y + HEIGHT // 2) * UNIT - RADIUS,
         fill=colour,
         outline=colour,
         state="disabled"
@@ -56,14 +65,14 @@ def draw_edge(
     b_x, b_y = vertex_b
 
     canvas.create_line(
-        (a_x + WIDTH // 2) * UNIT, (a_y + HEIGHT // 2) * UNIT,
-        (b_x + WIDTH // 2) * UNIT, (b_y + HEIGHT // 2) * UNIT,
+        (a_x + WIDTH // 2) * UNIT, (-a_y + HEIGHT // 2) * UNIT,
+        (b_x + WIDTH // 2) * UNIT, (-b_y + HEIGHT // 2) * UNIT,
         fill="black"
     )
     canvas.update()
 
 
-def get_adjacent(
+def get_adjacent_WAITING(
         vertex: Vertex
 ) -> Set[Vertex]:
     adjacent: Set[Vertex] = set()
@@ -77,6 +86,12 @@ def get_adjacent(
                 adjacent.add(maybe_adj)
 
     return adjacent
+
+
+def get_adjacent(
+        vertex: Vertex
+) -> Set[Vertex]:
+    return ADJACENTS.get(vertex, set())
 
 
 def distance(
@@ -149,7 +164,16 @@ def forbid_area(
 
 
 def init_forbidden() -> None:
-    forbid_area((-1, 2), (1, -2))
+    # forbid_area((-1, 2), (1, -2))
+    pass
+
+
+def map_to_vertices() -> None:
+    the_map = map.init_map()
+
+    for area in the_map.get_areas():
+        for node in area.get_nodes():
+            ADJACENTS[node.position] = set([n.position for n in node.get_adjacent()])
 
 
 def draw_forbidden(
@@ -179,6 +203,8 @@ def main() -> None:
     canvas.bind_all("q", lambda _: start_seeker())
 
     init_forbidden()  # edit body of this func to manage forbidden areas
+
+    map_to_vertices()
 
     draw_forbidden(canvas)
     draw_vertex(canvas, SOURCE, COLOUR_SOURCE)
