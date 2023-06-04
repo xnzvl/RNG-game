@@ -10,19 +10,17 @@ import map
 
 Vertex = Tuple[int, int]
 
-DELAY = 1.5  # float seconds
+DELAY = 0.5  # float seconds
+CUSTOM = False
 
-HEIGHT = 10
-WIDTH = 10
+HEIGHT = 51
+WIDTH = 2 * HEIGHT
 
-UNIT = 50
-RADIUS = 10
+UNIT = 15
+RADIUS = UNIT // 3
 
-# SOURCE = (- WIDTH // 4, 0)
-# TARGET = (WIDTH // 4, 0)
-
-SOURCE = (4, 4)
-TARGET = (-4, -4)
+SOURCE = (-WIDTH // 4, 0)
+TARGET = (WIDTH // 4, 0)
 
 FORBIDDEN: Set[Vertex] = set()
 
@@ -72,7 +70,7 @@ def draw_edge(
     canvas.update()
 
 
-def get_adjacent_WAITING(
+def get_adjacent_from_position(
         vertex: Vertex
 ) -> Set[Vertex]:
     adjacent: Set[Vertex] = set()
@@ -88,7 +86,7 @@ def get_adjacent_WAITING(
     return adjacent
 
 
-def get_adjacent(
+def get_adjacent_from_dict(
         vertex: Vertex
 ) -> Set[Vertex]:
     return ADJACENTS.get(vertex, set())
@@ -163,8 +161,7 @@ def forbid_area(
 
 
 def init_forbidden() -> None:
-    # forbid_area((-1, 2), (1, -2))
-    pass
+    forbid_area((-1, 2), (1, -2))
 
 
 def map_to_vertices() -> None:
@@ -173,6 +170,19 @@ def map_to_vertices() -> None:
     for area in the_map.get_areas():
         for node in area.get_nodes():
             ADJACENTS[node.position] = set([n.position for n in node.get_adjacent()])
+
+
+def custom_config() -> None:
+    global SOURCE, TARGET, WIDTH, HEIGHT, UNIT, RADIUS
+
+    SOURCE = (4, 4)
+    TARGET = (-4, -4)
+
+    WIDTH = 10
+    HEIGHT = 10
+
+    UNIT = 50
+    RADIUS = 10
 
 
 def draw_forbidden(
@@ -194,16 +204,18 @@ def main() -> None:
         else:
             seeking = 2
 
+    if CUSTOM:
+        custom_config()
+        map_to_vertices()
+    else:
+        init_forbidden()  # edit body of this func to manage forbidden areas
+
     window = tk.Tk()
     window.title("MAP-shortest_path_finder:testing")
     canvas = tk.Canvas(window, width=WIDTH * UNIT, height=HEIGHT * UNIT)
     canvas.pack()
 
     canvas.bind_all("q", lambda _: start_seeker())
-
-    init_forbidden()  # edit body of this func to manage forbidden areas
-
-    map_to_vertices()
 
     draw_forbidden(canvas)
     draw_vertex(canvas, SOURCE, COLOUR_SOURCE)
@@ -213,4 +225,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    get_adjacent = get_adjacent_from_dict if CUSTOM else get_adjacent_from_position
     main()
