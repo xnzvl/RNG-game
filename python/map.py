@@ -5,8 +5,6 @@ import dataclasses
 import heapq
 import math
 
-import drawer
-
 
 class Map:
     def __init__(
@@ -318,6 +316,8 @@ def init_map() -> Map:
 
 
 def main() -> None:
+    import drawer
+
     the_map = init_map()
     drawer.Display_map(the_map)
 
