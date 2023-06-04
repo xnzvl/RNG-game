@@ -225,15 +225,13 @@ def dijkstra(
         prev_node = tracker.previous_tracker.node.id \
             if tracker.previous_tracker is not None \
             else "#"
-        print(f"({prev_node})", node.id, [(t.node.id, round(p, 2)) for p, t in heap])
+        print(f"({prev_node})", [t.node.id for _, t in heap])
         # ====================================
 
         if node == target_node:
             return tracker
 
-        for adjacent in [
-                n for n in node.get_adjacent() if n not in lowest_priorities
-        ]:
+        for adjacent in node.get_adjacent():
             alt_prio = travelled \
                 + distance(node, adjacent) \
                 + distance(adjacent, target_node)

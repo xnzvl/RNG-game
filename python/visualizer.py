@@ -13,20 +13,19 @@ Vertex = Tuple[int, int]
 DELAY = 0.01  # float seconds
 CUSTOM = False
 
-HEIGHT = 51
+HEIGHT = 24
 WIDTH = 2 * HEIGHT
 
-UNIT = 15
+UNIT = 27
 RADIUS = UNIT // 3
 
-SOURCE = (-WIDTH // 4, 15)
-TARGET = (WIDTH // 4, -15)
+SOURCE = (-WIDTH // 4, 0)
+TARGET = (WIDTH // 4, 0)
 
 FORBIDDEN: Set[Vertex] = set()
 
-COLOUR_CURRENT = "red"
 COLOUR_FORBIDDEN = "#5400a8"
-COLOUR_HIT = "white"
+COLOUR_HIT = "red"
 COLOUR_SOURCE = "#00eaff"
 COLOUR_TARGET = "#ff8d00"
 
@@ -133,7 +132,6 @@ def seeker_pop(
 
     draw_vertex(canvas, vertex, popped_colour)
     draw_vertex(canvas, SOURCE, COLOUR_SOURCE)
-    draw_vertex(canvas, TARGET, COLOUR_TARGET)
 
     return vertex
 
@@ -174,6 +172,7 @@ def seeker(
                 return
 
         elif pop_src == TARGET:
+            draw_vertex(canvas, TARGET, COLOUR_HIT)
             return
 
         time.sleep(DELAY)
@@ -199,9 +198,11 @@ def init_forbidden() -> None:
     # forbid_area((-WIDTH // 4 - 2, -2), (-WIDTH // 4 + 2, -2))
     # forbid_area((-WIDTH // 4 + 2, -2), (-WIDTH // 4 + 2, 2))
 
-    forbid_area((-1, 13), (1, -13))
-    forbid_area((-13, 7), (13, 5))
-    forbid_area((-13, -7), (13, -5))
+    forbid_area((-1, 2), (1, -2))
+
+    # forbid_area((-1, 13), (1, -13))
+    # forbid_area((-13, 7), (13, 5))
+    # forbid_area((-13, -7), (13, -5))
 
     # forbid_area((WIDTH // 4 - 2, 2), (WIDTH // 4 + 2, 2))
     # forbid_area((WIDTH // 4 - 2, -2), (WIDTH // 4 + 2, -2))
@@ -246,7 +247,7 @@ def main() -> None:
         seeking += 1
 
         if seeking == 1:
-            seeker(canvas, SOURCE, TARGET, True)
+            seeker(canvas, SOURCE, TARGET)
         else:
             seeking = 2
 
