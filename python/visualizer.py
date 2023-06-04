@@ -10,13 +10,13 @@ import map
 
 Vertex = Tuple[int, int]
 
-DELAY = 0.5  # float seconds
+DELAY = 1.5  # float seconds
 
 HEIGHT = 10
 WIDTH = 10
 
 UNIT = 50
-RADIUS = UNIT // 3
+RADIUS = 10
 
 # SOURCE = (- WIDTH // 4, 0)
 # TARGET = (WIDTH // 4, 0)
@@ -128,8 +128,7 @@ def seeker(
             draw_vertex(canvas, vertex, COLOUR_HIT)
             return
 
-        adjacent_vertices = [n for n in get_adjacent(vertex) if n not in lowest_priorities]
-        for adjacent in adjacent_vertices:
+        for adjacent in get_adjacent(vertex):
             alt_prio = travelled \
                 + distance(vertex, adjacent) \
                 + distance(adjacent, target)
