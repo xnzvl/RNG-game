@@ -73,12 +73,17 @@ def get_adjacent_from_position(
     adjacent: Set[Vertex] = set()
     x, y = vertex
 
-    for tmp_x in range(-1, 2):
-        for tmp_y in range(-1, 2):
-            maybe_adj = (x + tmp_x, y + tmp_y)
+    for x_add in range(-1, 2):
+        for y_add in range(-1, 2):
+            tmp_x = x + x_add
+            tmp_y = y + y_add
+            tmp_vertex = (tmp_x, tmp_y)
 
-            if maybe_adj not in FORBIDDEN and maybe_adj != vertex:
-                adjacent.add(maybe_adj)
+            if - WIDTH // 2 < tmp_x and tmp_x < WIDTH // 2 \
+                    and - HEIGHT // 2 < tmp_y and tmp_y < HEIGHT // 2 \
+                    and tmp_vertex not in FORBIDDEN \
+                    and tmp_vertex != vertex:
+                adjacent.add(tmp_vertex)
 
     return adjacent
 
