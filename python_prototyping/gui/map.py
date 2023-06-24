@@ -141,6 +141,12 @@ class Map:
             self
     ) -> Tuple[Placement, tk.Frame]:
         
+        def bind_zoom(
+                widget: tk.Widget
+        ) -> None:
+            widget.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", self.scroll))
+            widget.bind("<Leave>", lambda _: self.window.unbind_all("<MouseWheel>"))
+
         def zoom_in() -> None:
             print("Zoom [+]")
             self.zoom_indicator.place(y=self.scroll_check(self.zoom_indicator.winfo_y() - 2 * self.separator))
@@ -157,18 +163,22 @@ class Map:
         tk.Button(frame, bg="gray", command=lambda: zoom_in()) \
             .place(x=0, y=0, width=tmp_a, height=tmp_a)
 
-        zoom_bar = tk.Button(frame, bg="gray", state="disabled")
-        zoom_bar.place(x=1.5*self.separator, y=tmp_a+self.separator, width=self.separator, height=bar_len)
-
         tk.Button(frame, bg="gray", command=lambda: zoom_out()) \
             .place(x=0, y=tmp_a+2*self.separator+bar_len, width=tmp_a, height=tmp_a)
+
+        zoom_tolerance = tk.Frame(frame)
+        zoom_tolerance.place(x=0, y=tmp_a+self.separator, width=tmp_a, height=bar_len)
+
+        zoom_bar = tk.Button(frame, bg="gray", state="disabled")
+        zoom_bar.place(x=1.5*self.separator, y=tmp_a+self.separator, width=self.separator, height=bar_len)
 
         zoom_indicator = tk.Button(frame, bg="silver", state="disabled")
         zoom_indicator.place(x=0.5*self.separator, y=50, width=self.separator*3, height=self.separator)
         self.zoom_indicator = zoom_indicator
 
-        zoom_bar.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", self.scroll))
-        zoom_bar.bind("<Leave>", lambda _: self.window.unbind_all("<MouseWheel>"))
+        bind_zoom(zoom_tolerance)
+        bind_zoom(zoom_bar)
+        bind_zoom(zoom_indicator)
 
         frame_width = tmp_a
         frame_height = 2 * tmp_a + 2 * self.separator + bar_len
