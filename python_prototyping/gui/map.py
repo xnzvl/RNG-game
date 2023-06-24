@@ -13,7 +13,7 @@ class Map:
             width:  int,
             height: int
     ) -> None:
-        window.title("Map")
+        window.title("PROTOTYPE:Map")
 
         self.window = window
         self.width  = width
@@ -71,37 +71,37 @@ class Map:
     ) -> None:
         a_s = self.a / 3
 
-        ne = tk.Button(self.window, bg="gray", command=lambda: self.switch("ne")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("ne")) \
             .place(
                 x=self.width-a_s, y=self.margin+self.vertical_boost+a_s,
                 width=a_s, height=a_s
             )
 
-        ce = tk.Button(self.window, bg="gray", command=lambda: self.switch("ce")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("ce")) \
             .place(
                 x=self.width-a_s, y=self.height/2-a_s/2,
                 width=a_s, height=a_s
             )
 
-        se = tk.Button(self.window, bg="gray", command=lambda: self.switch("se")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("se")) \
             .place(
                 x=self.width-a_s, y=self.height-self.margin-self.vertical_boost-2*a_s,
                 width=a_s, height=a_s
             )
 
-        nw = tk.Button(self.window, bg="gray", command=lambda: self.switch("nw")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("nw")) \
             .place(
                 x=0, y=self.margin+self.vertical_boost+a_s,
                 width=a_s, height=a_s
             )
 
-        cw = tk.Button(self.window, bg="gray", command=lambda: self.switch("cw")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("cw")) \
             .place(
                 x=0, y=self.height/2-a_s/2,
                 width=a_s, height=a_s
             )
 
-        sw = tk.Button(self.window, bg="gray", command=lambda: self.switch("sw")) \
+        tk.Button(self.window, bg="gray", command=lambda: self.switch("sw")) \
             .place(
                 x=0, y=self.height-self.margin-self.vertical_boost-2*a_s,
                 width=a_s, height=a_s
@@ -209,11 +209,30 @@ class Map:
     def nw_frame(
             self
     ) -> Tuple[Placement, tk.Frame]:
-        frame = tk.Frame(self.window, bg="red")
+        frame = tk.Frame(self.window)
+
+        frame_width = 500
+        frame_height = self.height * (1 / 5)
+        unit = frame_height * (1 / 10)
+
+        area_h = 7 * unit
+        area = tk.Frame(frame)
+        area.place(x=unit, y=unit, width=frame_width-self.margin/2, height=area_h)
+        tk.Label(area, text="Overworld", font=("system", -int(area_h))) \
+            .place(x=0, y=0, height=area_h)
+
+        view_h = 2 * unit
+        view = tk.Frame(frame)
+        view.place(
+            x=unit*3, y=frame_height-view_h,
+            width=frame_width-self.margin, height=view_h
+        )
+        tk.Label(view, text="View level: whole map", font=("system", -int(view_h))) \
+            .place(x=0, y=0, height=view_h)
 
         return (
             self.margin, self.margin,
-            200, 200
+            frame_width, self.height * (1 / 5)
         ), frame
 
     def cw_frame(
@@ -225,7 +244,7 @@ class Map:
 
         return (
             self.margin, self.height / 2 - frame_height / 2,
-            50, frame_height
+            self.margin, frame_height
         ), frame
 
     def sw_frame(
