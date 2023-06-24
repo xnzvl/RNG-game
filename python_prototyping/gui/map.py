@@ -1,7 +1,7 @@
 import tkinter as tk
 
+from invader import create_invader
 from typing import Dict, Tuple
-
 
 Placement = Tuple[int, int, int, int]  # x, y, width, height
 
@@ -25,8 +25,12 @@ class Map:
         self.vertical_boost = 0
         self.separator      = self.a * (1 / 8)
 
+        self.display = None
         self.zoom_indicator = None
         self.switches: Dict[str, Tuple[bool, Tuple[Placement, tk.Frame]]] = dict()
+
+        self.min_scroll = (1 / 2) * self.a + self.separator
+        self.max_scroll = (2 / 5) * self.height
 
         self.init_frames()
         self.draw_default()
@@ -41,6 +45,10 @@ class Map:
         self.switches["nw"] = (True, self.nw_frame())
         self.switches["cw"] = (True, self.cw_frame())
         self.switches["sw"] = (True, self.sw_frame())
+
+        invader, width, height = create_invader(self.window, int(self.a / 2))
+        invader.place(x=self.width/2-width/2, y=self.height/2-height/2, width=width, height=height)
+        self.display = invader
 
     def draw_default(
             self
@@ -144,16 +152,16 @@ class Map:
         def bind_zoom(
                 widget: tk.Widget
         ) -> None:
-            widget.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", self.scroll))
+            widget.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", lambda e: self.scroll(-e.delta // 120)))
             widget.bind("<Leave>", lambda _: self.window.unbind_all("<MouseWheel>"))
 
         def zoom_in() -> None:
             print("Zoom [+]")
-            self.zoom_indicator.place(y=self.scroll_check(self.zoom_indicator.winfo_y() - 2 * self.separator))
+            self.scroll(-1)
 
         def zoom_out() -> None:
             print("Zoom [-]")
-            self.zoom_indicator.place(y=self.scroll_check(self.zoom_indicator.winfo_y() + 2 * self.separator))
+            self.scroll(1)
 
         frame = tk.Frame(self.window)
 
@@ -211,7 +219,7 @@ class Map:
     ) -> Tuple[Placement, tk.Frame]:
         frame = tk.Frame(self.window)
 
-        frame_width = 500
+        frame_width = self.width * (1 / 2)
         frame_height = self.height * (1 / 5)
         unit = frame_height * (1 / 10)
 
@@ -252,25 +260,38 @@ class Map:
     ) -> Tuple[Placement, tk.Frame]:
         frame = tk.Frame(self.window, bg="blue")
 
+        frame_width = self.width * (1 / 2)
+        frame_height = self.height * (1 / 5)
+
         return (
-            self.margin, self.height - self.margin - 200,
-            200, 200
+            self.margin, self.height - self.margin - frame_height,
+            frame_width, frame_height
         ), frame
+
+    def zoom_percentage(
+            self
+    ) -> None:
+        fixed_offset = round(self.a / 2 + self.separator)
+        max_zoom = int(self.max_scroll) - round(self.a / 2 + self.separator)
+
+        current_zoom_perc = (1 - ((self.zoom_indicator.winfo_y() - fixed_offset) / max_zoom)) * 100
+        print(f"{round(current_zoom_perc)}%")
 
     def scroll_check(
             self,
-            y: int
-    ) -> int:
-        if y < (1 / 2) * self.a + self.separator:
-            return (1 / 2) * self.a + self.separator
-        elif (2 / 5) * self.height < y:
-            return (2 / 5) * self.height 
+            y: float
+    ) -> float:
+        if y < self.min_scroll:
+            return self.min_scroll
+        elif self.max_scroll < y:
+            return self.max_scroll 
         return y
 
     def scroll(
             self,
-            event: tk.Event
+            polarity: int
     ) -> None:
-        polarity = -event.delta // 120
-        new_y = self.zoom_indicator.winfo_y() + 2 * self.separator * polarity
+        new_y = self.zoom_indicator.winfo_y() + polarity * 2 * self.separator
         self.zoom_indicator.place(y=self.scroll_check(new_y))
+        self.window.update()
+        self.zoom_percentage()  # remove later
