@@ -273,13 +273,38 @@ class Map:
     def cw_frame(
             self
     ) -> Tuple[Placement, tk.Frame]:
-        frame = tk.Frame(self.window, bg="lime")
+        frame = tk.Frame(self.window)
 
+        frame_width = self.width / 4
         frame_height = self.a + 2 * self.separator + (self.height - self.a - 2 * self.separator) * (2 / 5)
+
+        txt = tk.Label(
+            frame,
+            text="""Overworld\n"""
+            """├ School\n"""
+            """│ ├ 1st floor\n"""
+            """│ │ └ A018\n"""
+            """│ └ 2nd floor\n"""
+            """│   ├ A118\n"""
+            """│   └ B124\n"""
+            """├ Track\n"""
+            """│ ├ Football cage\n"""
+            """│ ├ Basketball cage\n"""
+            """│ ├ Volleyball court\n"""
+            """│ ├ Football field\n"""
+            """│ └ Athletics track\n"""
+            """└ Outside\n"""
+            """  ├ Armillary sphere\n"""
+            """  ├ Park\n"""
+            """  └ Jewish memorial""",
+            font=(FONT, -int(self.a/3)),
+            justify="left"
+        )
+        txt.place(x=self.a/5, y=(frame_height-txt.winfo_reqheight())/2)
 
         return (
             self.margin, self.height / 2 - frame_height / 2,
-            self.margin, frame_height
+            frame_width, frame_height
         ), frame
 
     def sw_frame(
