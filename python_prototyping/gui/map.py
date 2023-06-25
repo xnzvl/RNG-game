@@ -6,6 +6,9 @@ from typing import Dict, Tuple
 Placement = Tuple[int, int, int, int]  # x, y, width, height
 
 
+FONT = "system"
+
+
 class Map:
     def __init__(
             self,
@@ -181,7 +184,10 @@ class Map:
         zoom_bar.place(x=1.5*self.separator, y=tmp_a+self.separator, width=self.separator, height=bar_len)
 
         zoom_indicator = tk.Button(frame, bg="silver", state="disabled")
-        zoom_indicator.place(x=0.5*self.separator, y=50, width=self.separator*3, height=self.separator)
+        zoom_indicator.place(
+            x=0.5*self.separator, y=tmp_a+self.separator/2+bar_len/2,
+            width=self.separator*3, height=self.separator
+        )
         self.zoom_indicator = zoom_indicator
 
         bind_zoom(zoom_tolerance)
@@ -226,7 +232,7 @@ class Map:
         area_h = 7 * unit
         area = tk.Frame(frame)
         area.place(x=unit, y=unit, width=frame_width-self.margin/2, height=area_h)
-        tk.Label(area, text="Overworld", font=("system", -int(area_h))) \
+        tk.Label(area, text="Overworld", font=(FONT, -int(area_h))) \
             .place(x=0, y=0, height=area_h)
 
         view_h = 2 * unit
@@ -235,7 +241,7 @@ class Map:
             x=unit*3, y=frame_height-view_h,
             width=frame_width-self.margin, height=view_h
         )
-        tk.Label(view, text="View level: whole map", font=("system", -int(view_h))) \
+        tk.Label(view, text="View level: whole map", font=(FONT, -int(view_h))) \
             .place(x=0, y=0, height=view_h)
 
         return (
@@ -258,17 +264,41 @@ class Map:
     def sw_frame(
             self
     ) -> Tuple[Placement, tk.Frame]:
-        frame = tk.Frame(self.window, bg="blue")
+        frame = tk.Frame(self.window)
 
         frame_width = self.width * (1 / 2)
         frame_height = self.height * (1 / 5)
+        unit = frame_height / 12
+        indent = 5 * unit
+
+        header_h = 3 * unit
+        header = tk.Frame(frame)
+        header.place(x=0, y=0, width=frame_width, height=header_h)
+        tk.Label(header, text="Location of:", font=(FONT, -int(header_h))) \
+            .place(x=unit, y=0, height=header_h)
+
+        location_h = 2 * unit
+        location_me = tk.Frame(frame)
+        location_me.place(x=indent, y=unit*3.5, width=frame_width-unit, height=location_h)
+        tk.Label(location_me, text="me:\tSchool, A018", font=(FONT, -int(location_h))) \
+            .place(x=0, y=0, height=location_h)
+
+        location_quest = tk.Frame(frame)
+        location_quest.place(x=indent, y=unit*6, width=frame_width-unit, height=location_h)
+        tk.Label(location_quest, text="quest:\tSchool, B121", font=(FONT, -int(location_h))) \
+            .place(x=0, y=0, height=location_h)
+
+        location_pin = tk.Frame(frame)
+        location_pin.place(x=indent, y=unit*8.5, width=frame_width-unit, height=location_h)
+        tk.Label(location_pin, text="pin:\t---", font=(FONT, -int(location_h))) \
+            .place(x=0, y=0, height=location_h)
 
         return (
             self.margin, self.height - self.margin - frame_height,
             frame_width, frame_height
         ), frame
 
-    def zoom_percentage(
+    def zoom_percentage(  # I don't take into account the height of the indicator :[
             self
     ) -> None:
         fixed_offset = round(self.a / 2 + self.separator)
@@ -276,6 +306,11 @@ class Map:
 
         current_zoom_perc = (1 - ((self.zoom_indicator.winfo_y() - fixed_offset) / max_zoom)) * 100
         print(f"{round(current_zoom_perc)}%")
+
+    def update_display(
+            self
+    ) -> None:
+        self.zoom_percentage()  # TODO: remove later
 
     def scroll_check(
             self,
@@ -294,4 +329,4 @@ class Map:
         new_y = self.zoom_indicator.winfo_y() + polarity * 2 * self.separator
         self.zoom_indicator.place(y=self.scroll_check(new_y))
         self.window.update()
-        self.zoom_percentage()  # remove later
+        self.update_display()
