@@ -6,6 +6,7 @@ from typing import Dict, Tuple
 Placement = Tuple[int, int, int, int]  # x, y, width, height
 
 
+ZOOM_RANGE = 1 / 4
 FONT = "system"
 
 
@@ -29,6 +30,7 @@ class Map:
         self.separator      = self.a * (1 / 8)
 
         self.display = None
+
         self.zoom_indicator = None
         self.switches: Dict[str, Tuple[bool, Tuple[Placement, tk.Frame]]] = dict()
 
@@ -49,9 +51,9 @@ class Map:
         self.switches["cw"] = (True, self.cw_frame())
         self.switches["sw"] = (True, self.sw_frame())
 
-        invader, width, height = create_invader(self.window, int(self.a / 2))
-        invader.place(x=self.width/2-width/2, y=self.height/2-height/2, width=width, height=height)
-        self.display = invader
+        self.window.update()
+
+        self.update_display()
 
     def draw_default(
             self
@@ -62,6 +64,25 @@ class Map:
                 x, y, w, h = placement
 
                 frame.place(x=x, y=y, width=w, height=h)
+
+    def update_display(
+            self
+    ) -> None:
+        zoom = self.zoom_percentage()
+
+        if self.display is not None:
+            old_display, _, _ = self.display
+            old_display.destroy()
+
+        self.display = create_invader(self.window, int((self.a / 2) * zoom))
+        display_frame, width, height = self.display
+
+        display_frame.place(
+            x=self.width/2-width/2, y=self.height/2-height/2,
+            width=width, height=height
+        )
+
+        self.window.update()
 
     def switch(
             self,
@@ -155,16 +176,16 @@ class Map:
         def bind_zoom(
                 widget: tk.Widget
         ) -> None:
-            widget.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", lambda e: self.scroll(-e.delta // 120)))
+            widget.bind("<Enter>", lambda _: self.window.bind_all("<MouseWheel>", lambda e: self.scroll(e.delta // 120)))
             widget.bind("<Leave>", lambda _: self.window.unbind_all("<MouseWheel>"))
 
         def zoom_in() -> None:
             print("Zoom [+]")
-            self.scroll(-1)
+            self.scroll(1)
 
         def zoom_out() -> None:
             print("Zoom [-]")
-            self.scroll(1)
+            self.scroll(-1)
 
         frame = tk.Frame(self.window)
 
@@ -285,12 +306,12 @@ class Map:
 
         location_quest = tk.Frame(frame)
         location_quest.place(x=indent, y=unit*6, width=frame_width-unit, height=location_h)
-        tk.Label(location_quest, text="quest:\tSchool, B121", font=(FONT, -int(location_h))) \
+        tk.Label(location_quest, text="quest:\tOutside, Armillary sphere", font=(FONT, -int(location_h))) \
             .place(x=0, y=0, height=location_h)
 
         location_pin = tk.Frame(frame)
         location_pin.place(x=indent, y=unit*8.5, width=frame_width-unit, height=location_h)
-        tk.Label(location_pin, text="pin:\t---", font=(FONT, -int(location_h))) \
+        tk.Label(location_pin, text="pin:\tTrack, Football cage", font=(FONT, -int(location_h))) \
             .place(x=0, y=0, height=location_h)
 
         return (
@@ -298,21 +319,19 @@ class Map:
             frame_width, frame_height
         ), frame
 
-    def zoom_percentage(  # I don't take into account the height of the indicator :[
+    def zoom_percentage(
             self
-    ) -> None:
-        fixed_offset = round(self.a / 2 + self.separator)
-        max_zoom = int(self.max_scroll) - round(self.a / 2 + self.separator)
+    ) -> float:
+        range_min = 2 - ZOOM_RANGE
+        range_max = ZOOM_RANGE
 
-        current_zoom_perc = (1 - ((self.zoom_indicator.winfo_y() - fixed_offset) / max_zoom)) * 100
-        print(f"{round(current_zoom_perc)}%")
+        return round(
+            ((range_max - range_min) * (self.zoom_indicator.winfo_y() - self.min_scroll))
+            / (self.max_scroll - self.min_scroll)
+            + range_min, 2
+        )
 
-    def update_display(
-            self
-    ) -> None:
-        self.zoom_percentage()  # TODO: remove later
-
-    def scroll_check(
+    def boundary_check(
             self,
             y: float
     ) -> float:
@@ -326,7 +345,7 @@ class Map:
             self,
             polarity: int
     ) -> None:
-        new_y = self.zoom_indicator.winfo_y() + polarity * 2 * self.separator
-        self.zoom_indicator.place(y=self.scroll_check(new_y))
+        new_y = self.zoom_indicator.winfo_y() + (-2) * polarity * self.separator
+        self.zoom_indicator.place(y=self.boundary_check(new_y))
         self.window.update()
         self.update_display()

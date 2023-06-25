@@ -25,7 +25,7 @@ def create_invader(
         master: tk.Tk,
         unit: int
 ) -> Tuple[tk.Frame, int, int]:
-    frame = tk.Frame(master)
+    frame = tk.Frame(master, bg="#DDDDDD")
 
     for row, line in enumerate(INVADER):
         frame_line(frame, unit, line, row)
@@ -44,7 +44,7 @@ def frame_line(
 
     for step in steps:
         if black:
-            tk.Frame(master, bg="black") \
+            tk.Frame(master, bg="#abe062") \
                 .place(x=x*unit, y=line*unit, width=step*unit, height=unit)
 
         x += step

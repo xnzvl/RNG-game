@@ -32,7 +32,8 @@
 # Mapa
 - čudlíky čudlíkujou a na konzoli vypisují, co dělají (nebo by měly dělat)
     - prostě vyzkoušej vše proklikat :)
-- zoom scroll bar funguje na kolečko myši
+- na zoom scroll bar funguje kolečko myši
+    - v opravdové hře by mělo fungovvat kolečko myši kdekoliv na mapě (too hard to implement rn)
     - přidána oblast tolerance, kde scrolling funguje taky
 
 
@@ -43,4 +44,5 @@
 # Mapa
 
 - [FIXED] scrolling nefunguje, když je indikátor pod kurzorem
+- ukázkovej obrázek překrývá ostatní věci :(
 
